@@ -3,7 +3,8 @@
 ## Overview
 A static website built to help a dental hygiene student at Concorde Career College sign up patients for the 60 supervised dental cleanings needed to complete clinical patient requirements. Visitors can learn about the program, see the process, and submit their contact info and availability through a signup form.
 
-**Live site:** *(add your S3/CloudFront URL here once deployed)*
+**Live site:** 
+https://smilewithjay.com/)
 
 ---
 
