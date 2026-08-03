@@ -9,7 +9,7 @@ https://smilewithjay.com
 ---
 
 ## Purpose
-This project is also my first portfolio piece as I transition from truck driving into IT/cloud support. It's meant to demonstrate:
+This project is also my first portfolio piece as I transition from fuel hauling into IT/cloud support. It's meant to demonstrate:
 - Front-end development (HTML/CSS, Bootstrap)
 - Working with a third-party template and customizing it
 - Form handling via a third-party service (Formspree)
