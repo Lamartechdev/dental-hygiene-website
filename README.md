@@ -30,6 +30,8 @@ What the site does for patients:
 ```
 Visitor → Route 53 (DNS) → CloudFront (HTTPS, ACM certificate) → S3 bucket (private, OAC)
 
+API endpoint: https://498pqb5lq4.execute-api.us-east-1.amazonaws.com/slots
+
 Booking system (in progress):
 Browser → API Gateway → Lambda (Python, arm64) → DynamoDB
                                      └→ SES email alerts (planned)
