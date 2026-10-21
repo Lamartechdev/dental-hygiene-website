@@ -191,4 +191,4 @@ Lambda code is currently deployed by pasting into the Lambda console. The copy i
 - Iterative debugging and visual refinement
 
 ## Author
-Joshua L. Grant. Built as part of a career transition from commercial trucking into cloud/IT support.
+Joshua L. Grant (Lamar Tech Development). Built as part of a career transition from commercial trucking into cloud/IT support.
