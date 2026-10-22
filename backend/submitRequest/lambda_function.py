@@ -1,0 +1,41 @@
+import json
+import uuid
+from datetime import datetime, timezone
+import boto3
+
+table = boto3.resource("dynamodb").Table("smilewithj-request")
+
+HEADERS = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "https://smilewithj.com"
+}
+
+def reply(code, body):
+    return {"statusCode": code, "headers": HEADERS, "body": json.dumps(body)}
+
+def lambda_handler(event, context):
+    try:
+        data = json.loads(event.get("body") or "{}")
+    except json.JSONDecodeError:
+        return reply(400, {"error": "Invalid request."})
+
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip()
+    phone = data.get("phone", "").strip()
+    preferred = data.get("preferredTime", "").strip()
+
+    if not (name and (email or phone) and preferred):
+        return reply(400, {"error": "Please include your name, an email or phone number, and your preferred date and time."})
+
+    request_id = str(uuid.uuid4())
+    table.put_item(Item={
+        "requestId": request_id,
+        "status": "pending",
+        "patientName": name,
+        "email": email,
+        "phone": phone,
+        "preferredTime": preferred,
+        "createdAt": datetime.now(timezone.utc).isoformat()
+    })
+
+    return reply(200, {"message": "Request received! Jay-An will contact you to confirm.", "requestId": request_id})

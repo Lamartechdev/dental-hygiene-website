@@ -44,7 +44,7 @@ Browser → API Gateway → Lambda (Python, arm64) → DynamoDB
 | AWS Certificate Manager | TLS certificate for the root domain and wildcard subdomain, validated through Route 53 |
 | Amazon Route 53 | Hosted zone and alias record to CloudFront (domain registered at Namecheap) |
 | AWS Lambda | Backend functions for the booking system (Python, arm64 / Graviton) |
-| Amazon DynamoDB | Stores time slots and patient requests (on-demand capacity) |
+| Amazon DynamoDB | Stores time slots and patient request (on-demand capacity) |
 | Amazon API Gateway | In progress |
 | Amazon SES | Planned, for email alerts on new bookings |
 
@@ -65,7 +65,7 @@ Browser → API Gateway → Lambda (Python, arm64) → DynamoDB
 | Table | Partition key | Notes |
 |---|---|---|
 | `smilewithj-slots` | `slotId` (String), e.g. `2026-11-05T10:00` | `status` attribute: `open` → `booked` → `completed`, or `no-show`. Completed slots are counted to track progress toward 60 cleanings |
-| `smilewithj-requests` | `requestId` (String) | Requests for times outside the open slots, held as pending until confirmed or declined |
+| `smilewithj-request` | `requestId` (String) | Requests for times outside the open slots, held as pending until confirmed or declined |
 
 Both tables use on-demand capacity, deletion protection, and the tag `Project = smilewithj`. Booking will use a DynamoDB conditional write so two patients can't take the same slot.
 
@@ -175,11 +175,12 @@ Lambda code is currently deployed by pasting into the Lambda console. The copy i
 - [x] S3 locked down with Origin Access Control
 - [x] DynamoDB tables created
 - [x] First Lambda function (`getOpenSlots`) working
+- [x] Booking Lambda (bookSlot) with conditional write to prevent double booking
 - [ ] API Gateway
 - [ ] Booking section on the page (replaces the current contact form)
 - [ ] SES email alerts
 - [ ] Booking and request Lambda functions
-
+- [x] Request Lambda (submitRequest) for times outside open slots
 ---
 
 ## Skills Demonstrated
