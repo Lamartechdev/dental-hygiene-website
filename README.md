@@ -5,7 +5,7 @@ A website built to help a dental hygiene student at Concorde Career College sign
 
 A serverless booking system (Lambda, DynamoDB, API Gateway) is being added so patients can pick open time slots directly.
 
-**Live site:** https://smilewithj.com
+**Live site:** https://smilewithjay.com
 
 ---
 
@@ -54,7 +54,7 @@ Browser → API Gateway → Lambda (Python, arm64) → DynamoDB
 - **Private S3 bucket.** Only this CloudFront distribution can read it, through Origin Access Control. The bucket policy includes an `AWS:SourceArn` condition to prevent the confused deputy problem.
 - **No direct S3 access.** Static website hosting is disabled and Block Public Access is on, so direct S3 links return Access Denied.
 - **Least privilege for Lambda.** Each function's role gets only the actions it needs, on only the table it uses. For example, `getOpenSlots` can only `Scan` the slots table.
-- **CORS locked to the site.** The Lambda response only allows browser requests from `https://smilewithj.com`.
+- **CORS locked to the site.** The Lambda response only allows browser requests from `https://smilewithjay.com`.
 - **Account protection.** The root user is protected with MFA and isn't used for daily work. Day-to-day access is through IAM Identity Center with its own MFA.
 - **No health information** is collected on the signup form.
 

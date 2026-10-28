@@ -6,7 +6,7 @@ table = boto3.resource("dynamodb").Table("smilewithj-slots")
 
 HEADERS = {
     "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "https://smilewithj.com"
+    "Access-Control-Allow-Origin": "https://smilewithjay.com"
 }
 
 def reply(code, body):
