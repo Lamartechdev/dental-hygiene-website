@@ -1,8 +1,13 @@
 import json
 import boto3
+from datetime import datetime
 from botocore.exceptions import ClientError
 
 table = boto3.resource("dynamodb").Table("smilewithj-slots")
+ses = boto3.client("ses")
+
+ALERT_TO = "Jayanbulan0691@gmail.com"
+ALERT_FROM = "Smile with Jay <alerts@smilewithjay.com>"
 
 HEADERS = {
     "Content-Type": "application/json",
@@ -11,6 +16,35 @@ HEADERS = {
 
 def reply(code, body):
     return {"statusCode": code, "headers": HEADERS, "body": json.dumps(body)}
+
+def pretty_time(slot_id):
+    # "2026-11-12T10:00" -> "Thursday, Nov 12 at 10:00 AM"
+    return datetime.strptime(slot_id, "%Y-%m-%dT%H:%M").strftime("%A, %b %d at %I:%M %p")
+
+def send_alert(slot_id, name, email, phone):
+    lines = [
+        "New booking on smilewithjay.com!",
+        "",
+        f"When:  {pretty_time(slot_id)}",
+        f"Name:  {name}",
+        f"Email: {email or 'not given'}",
+        f"Phone: {phone or 'not given'}",
+    ]
+    message = {
+        "Source": ALERT_FROM,
+        "Destination": {"ToAddresses": [ALERT_TO]},
+        "Message": {
+            "Subject": {"Data": f"New booking: {name}, {pretty_time(slot_id)}"},
+            "Body": {"Text": {"Data": "\n".join(lines)}}
+        }
+    }
+    if email:
+        message["ReplyToAddresses"] = [email]
+    try:
+        ses.send_email(**message)
+    except ClientError as err:
+        # The booking still counts even if the email fails. The error shows up in CloudWatch logs.
+        print("Email alert failed:", err)
 
 def lambda_handler(event, context):
     try:
@@ -45,4 +79,5 @@ def lambda_handler(event, context):
             return reply(409, {"error": "Sorry, that time was just taken. Please pick another."})
         raise
 
+    send_alert(slot_id, name, email, phone)
     return reply(200, {"message": "You're booked!", "slotId": slot_id})
