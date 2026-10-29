@@ -99,11 +99,44 @@ function showConfirmation(slotId) {
         <div class="p-4 border rounded bg-white">
             <h3 class="h4 mb-3">You're booked! We can't wait to see you.</h3>
             <p class="mb-2"><strong>When:</strong> <span id="confirmTime"></span></p>
-            <p class="mb-2"><strong>Where:</strong> Concorde Career College, Garden Grove</p>
-            <p class="mb-3"><a href="https://www.google.com/maps/search/?api=1&query=Concorde+Career+College+Garden+Grove" target="_blank" rel="noopener">Get directions</a></p>
+                        <p class="mb-2"><strong>Where:</strong> Concorde Career College, 12951 Euclid St #101, Garden Grove, CA 92840</p>
+            <p class="mb-3"><a href="https://www.google.com/maps/search/?api=1&query=12951+Euclid+St+%23101+Garden+Grove+CA+92840" target="_blank" rel="noopener">Get directions</a></p>
             <p class="text-muted mb-0">Jay-An will reach out to confirm. Questions? Call or text +1 (949) 630-7148.</p>
         </div>`;
     document.getElementById("confirmTime").textContent = prettyTime(slotId);
 }
 
 loadSlots();
+// Request form: people who can't find a time send their info to POST /request
+const contactForm = document.getElementById("contactForm");
+const submitButton = document.getElementById("submitButton");
+
+contactForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    submitButton.disabled = true;
+    submitButton.textContent = "Sending...";
+
+    try {
+        const response = await fetch(`${API_URL}/request`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: document.getElementById("name").value,
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
+                preferredTime: document.getElementById("message").value
+            })
+        });
+
+        if (response.ok) {
+            contactForm.innerHTML = ' Thank you! We got your request. Jay-An will reach out within 1–2 business days to find a time that works for you.';
+        } else {
+            alert("Something went wrong. Please try again or call +1 (949) 630-7148.");
+        }
+    } catch (err) {
+        alert("Couldn't reach the system. Please try again or call +1 (949) 630-7148.");
+    }
+
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit";
+});

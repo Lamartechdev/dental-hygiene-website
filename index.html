@@ -116,6 +116,44 @@
                 <a class="btn btn-light btn-xl" href="#contact">Sign Up Now</a>
             </div>
         </section>
+                <!-- Book a Time-->
+        <section class="page-section bg-light" id="book">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-lg-8 text-center">
+                        <h2 class="mt-0">Pick a Time</h2>
+                        <hr class="divider" />
+                        <p class="text-muted mb-4">Choose an open time below and enter your contact info to reserve your free cleaning.</p>
+                    </div>
+                </div>
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-lg-6">
+                        <div id="slotList" class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                            <p class="text-muted">Loading open times...</p>
+                        </div>
+                        <form id="bookForm" class="d-none">
+                            <p class="text-center mb-3">Selected time: <strong id="selectedSlot"></strong></p>
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="bookName" type="text" placeholder="Full name" required />
+                                <label for="bookName">Full name</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="bookEmail" type="email" placeholder="name@example.com" required />
+                                <label for="bookEmail">Email address</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input class="form-control" id="bookPhone" type="tel" placeholder="(123) 456-7890" required />
+                                <label for="bookPhone">Phone number</label>
+                            </div>
+                            <div class="d-grid">
+                                <button class="btn btn-primary btn-xl" id="bookButton" type="submit">Book This Time</button>
+                            </div>
+                        </form>
+                        <div id="bookMessage" class="text-center mt-4"></div>
+                    </div>
+                </div>
+            </div>
+        </section>F
         <!-- Contact-->
         <section class="page-section" id="contact">
             <div class="container px-4 px-lg-5">
@@ -135,7 +173,7 @@
                         <!-- To make this form functional, sign up at-->
                         <!-- https://startbootstrap.com/solution/contact-forms-->
                         <!-- to get an API token!-->
-                      <form id="contactForm" action="https://formspree.io/f/mrenaobg" method="POST">
+                      <form id="contactForm">
     <!-- Name input-->
     <div class="form-floating mb-3">
         <input class="form-control" id="name" name="name" type="text" placeholder="Enter your name..." required />
@@ -182,6 +220,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/SimpleLightbox/2.1.0/simpleLightbox.min.js"></script>
         <!-- Core theme JS-->
         <script src="js/scripts.js"></script>
+                <script src="js/booking.js"></script>
         <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
         <!-- * *                               SB Forms JS                               * *-->
         <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
