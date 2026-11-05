@@ -19,14 +19,14 @@ function prettyTime(slotId) {
     return `${day} at ${hour}:${String(minute).padStart(2, "0")} ${ampm}`;
 }
 
-// Step 2 of the flow: ask GET /slots for the open times and show them as buttons
+// GET /slots: show open times as buttons
 async function loadSlots() {
     slotList.innerHTML = "";
     try {
         const response = await fetch(`${API_URL}/slots`);
         const data = await response.json();
         if (!data.openSlots || data.openSlots.length === 0) {
-            slotList.innerHTML = '<p class="text-muted">No open times right now. Please check back soon or use the form below.</p>';
+            slotList.innerHTML = '<p class="text-muted">No open times right now. Please check back soon or request another time below.</p>';
             return;
         }
         data.openSlots.forEach(slotId => {
@@ -38,11 +38,11 @@ async function loadSlots() {
             slotList.appendChild(button);
         });
     } catch (err) {
-        slotList.innerHTML = '<p class="text-muted">Couldn\'t load times right now. Please use the form below.</p>';
+        slotList.innerHTML = '<p class="text-muted">Couldn\'t load times right now. Please request a time below or call (949) 630-7148.</p>';
     }
 }
 
-// When a patient taps a time, highlight it and show the form
+// Patient taps a time: highlight it and show the form
 function pickSlot(slotId, button) {
     chosenSlot = slotId;
     slotList.querySelectorAll("button").forEach(b => b.classList.replace("btn-primary", "btn-outline-primary"));
@@ -52,12 +52,12 @@ function pickSlot(slotId, button) {
     bookMessage.innerHTML = "";
 }
 
-// Step 3 of the flow: POST /book with their info and chosen slot
+// POST /book: send their info and the chosen slot
 bookForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!chosenSlot) return;
     bookButton.disabled = true;
-    bookButton.textContent = "Booking...";
+    bookButton.textContent = "Sending...";
 
     try {
         const response = await fetch(`${API_URL}/book`, {
@@ -86,28 +86,29 @@ bookForm.addEventListener("submit", async (event) => {
             if (response.status === 409) loadSlots();
         }
     } catch (err) {
-        bookMessage.innerHTML = '<p class="text-danger">Couldn\'t reach the booking system. Please try again or use the form below.</p>';
+        bookMessage.innerHTML = '<p class="text-danger">Couldn\'t reach the system. Please try again or call (949) 630-7148.</p>';
     }
 
     bookButton.disabled = false;
-    bookButton.textContent = "Book This Time";
+    bookButton.textContent = "Request this time";
 });
 
-// The warm welcome message after a successful booking
+// Warm message after a time is requested
 function showConfirmation(slotId) {
     bookMessage.innerHTML = `
         <div class="p-4 border rounded bg-white">
-            <h3 class="h4 mb-3">You're booked! We can't wait to see you.</h3>
+            <h3 class="h4 mb-3">Request received! We can't wait to see you.</h3>
             <p class="mb-2"><strong>When:</strong> <span id="confirmTime"></span></p>
-                        <p class="mb-2"><strong>Where:</strong> Concorde Career College, 12951 Euclid St #101, Garden Grove, CA 92840</p>
+            <p class="mb-2"><strong>Where:</strong> Concorde Career College, 12951 Euclid St #101, Garden Grove, CA 92840</p>
             <p class="mb-3"><a href="https://www.google.com/maps/search/?api=1&query=12951+Euclid+St+%23101+Garden+Grove+CA+92840" target="_blank" rel="noopener">Get directions</a></p>
-            <p class="text-muted mb-0">Jay-An will reach out to confirm. Questions? Call or text +1 (949) 630-7148.</p>
+            <p class="text-muted mb-0">Jay-An will call to confirm your visit. Please wait for her confirmation before coming in. Questions? Call or text (949) 630-7148.</p>
         </div>`;
     document.getElementById("confirmTime").textContent = prettyTime(slotId);
 }
 
 loadSlots();
-// Request form: people who can't find a time send their info to POST /request
+
+// POST /request: patients who want a different time
 const contactForm = document.getElementById("contactForm");
 const submitButton = document.getElementById("submitButton");
 
@@ -129,14 +130,14 @@ contactForm.addEventListener("submit", async (event) => {
         });
 
         if (response.ok) {
-            contactForm.innerHTML = ' Thank you! We got your request. Jay-An will reach out within 1–2 business days to find a time that works for you.';
-        } else {
-            alert("Something went wrong. Please try again or call +1 (949) 630-7148.");
+            contactForm.innerHTML = '<p class="connection-note">Thank you! We got your request. We can\'t wait to see you. Jay-An will reach out within 1–2 business days to find a time that works for you.</p>';
+            return;
         }
+        alert("Something went wrong. Please try again or call (949) 630-7148.");
     } catch (err) {
-        alert("Couldn't reach the system. Please try again or call +1 (949) 630-7148.");
+        alert("Couldn't reach the system. Please try again or call (949) 630-7148.");
     }
 
     submitButton.disabled = false;
-    submitButton.textContent = "Submit";
+    submitButton.textContent = "Request my free cleaning";
 });
