@@ -7,6 +7,11 @@ const bookButton = document.getElementById("bookButton");
 const bookMessage = document.getElementById("bookMessage");
 let chosenSlot = null;
 
+// Where did this visitor come from? e.g. smilewithjay.com/?src=flyer
+const ALLOWED_SOURCES = ["flyer", "card", "social"];
+const tag = (new URLSearchParams(window.location.search).get("src") || "").toLowerCase();
+const SOURCE = ALLOWED_SOURCES.includes(tag) ? tag : "website";
+
 // Turn "2026-11-05T10:00" into "Thu, Nov 5 at 10:00 AM"
 function prettyTime(slotId) {
     const [datePart, timePart] = slotId.split("T");
@@ -67,7 +72,8 @@ bookForm.addEventListener("submit", async (event) => {
                 slotId: chosenSlot,
                 name: document.getElementById("bookName").value,
                 email: document.getElementById("bookEmail").value,
-                phone: document.getElementById("bookPhone").value
+                phone: document.getElementById("bookPhone").value,
+                source: SOURCE
             })
         });
         const data = await response.json();
@@ -125,7 +131,8 @@ contactForm.addEventListener("submit", async (event) => {
                 name: document.getElementById("name").value,
                 email: document.getElementById("email").value,
                 phone: document.getElementById("phone").value,
-                preferredTime: document.getElementById("message").value
+                preferredTime: document.getElementById("message").value,
+                source: SOURCE
             })
         });
 

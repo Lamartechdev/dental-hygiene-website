@@ -9,6 +9,7 @@ ses = boto3.client("ses")
 
 ALERT_TO = "Jayanbulan0691@gmail.com"
 ALERT_FROM = "Smile with Jay <alerts@smilewithjay.com>"
+ALLOWED_SOURCES = {"flyer", "card", "social", "website"}
 
 HEADERS = {
     "Content-Type": "application/json",
@@ -18,13 +19,14 @@ HEADERS = {
 def reply(code, body):
     return {"statusCode": code, "headers": HEADERS, "body": json.dumps(body)}
 
-def send_alert(name, email, phone, preferred):
+def send_alert(name, email, phone, preferred, source):
     lines = [
         "New appointment request on smilewithjay.com!",
         "",
         f"Name:  {name}",
         f"Email: {email or 'not given'}",
         f"Phone: {phone or 'not given'}",
+        f"Found us through: {source}",
         "",
         "Preferred day/time and message:",
         preferred,
@@ -54,6 +56,9 @@ def lambda_handler(event, context):
     email = data.get("email", "").strip()
     phone = data.get("phone", "").strip()
     preferred = data.get("preferredTime", "").strip()
+    source = data.get("source", "").strip().lower()
+    if source not in ALLOWED_SOURCES:
+        source = "website"
 
     if not (name and (email or phone) and preferred):
         return reply(400, {"error": "Please include your name, an email or phone number, and your preferred date and time."})
@@ -66,8 +71,9 @@ def lambda_handler(event, context):
         "email": email,
         "phone": phone,
         "preferredTime": preferred,
+        "source": source,
         "createdAt": datetime.now(timezone.utc).isoformat()
     })
 
-    send_alert(name, email, phone, preferred)
+    send_alert(name, email, phone, preferred, source)
     return reply(200, {"message": "Request received! Jay-An will contact you to confirm.", "requestId": request_id})

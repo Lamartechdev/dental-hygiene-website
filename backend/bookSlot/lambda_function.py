@@ -8,6 +8,7 @@ ses = boto3.client("ses")
 
 ALERT_TO = "Jayanbulan0691@gmail.com"
 ALERT_FROM = "Smile with Jay <alerts@smilewithjay.com>"
+ALLOWED_SOURCES = {"flyer", "card", "social", "website"}
 
 HEADERS = {
     "Content-Type": "application/json",
@@ -21,14 +22,15 @@ def pretty_time(slot_id):
     # "2026-11-12T10:00" -> "Thursday, Nov 12 at 10:00 AM"
     return datetime.strptime(slot_id, "%Y-%m-%dT%H:%M").strftime("%A, %b %d at %I:%M %p")
 
-def send_alert(slot_id, name, email, phone):
+def send_alert(slot_id, name, email, phone, source):
     lines = [
-        "New booking on smilewithjay.com!",
+        "New booking request on smilewithjay.com!",
         "",
         f"When:  {pretty_time(slot_id)}",
         f"Name:  {name}",
         f"Email: {email or 'not given'}",
         f"Phone: {phone or 'not given'}",
+        f"Found us through: {source}",
     ]
     message = {
         "Source": ALERT_FROM,
@@ -56,6 +58,9 @@ def lambda_handler(event, context):
     name = data.get("name", "").strip()
     email = data.get("email", "").strip()
     phone = data.get("phone", "").strip()
+    source = data.get("source", "").strip().lower()
+    if source not in ALLOWED_SOURCES:
+        source = "website"
 
     if not (slot_id and name and (email or phone)):
         return reply(400, {"error": "Please include a time slot, your name, and an email or phone number."})
@@ -63,15 +68,16 @@ def lambda_handler(event, context):
     try:
         table.update_item(
             Key={"slotId": slot_id},
-            UpdateExpression="SET #s = :booked, patientName = :n, email = :e, phone = :p",
+            UpdateExpression="SET #s = :booked, patientName = :n, email = :e, phone = :p, #src = :src",
             ConditionExpression="#s = :open",
-            ExpressionAttributeNames={"#s": "status"},
+            ExpressionAttributeNames={"#s": "status", "#src": "source"},
             ExpressionAttributeValues={
                 ":booked": "booked",
                 ":open": "open",
                 ":n": name,
                 ":e": email,
-                ":p": phone
+                ":p": phone,
+                ":src": source
             }
         )
     except ClientError as err:
@@ -79,5 +85,5 @@ def lambda_handler(event, context):
             return reply(409, {"error": "Sorry, that time was just taken. Please pick another."})
         raise
 
-    send_alert(slot_id, name, email, phone)
+    send_alert(slot_id, name, email, phone, source)
     return reply(200, {"message": "You're booked!", "slotId": slot_id})
