@@ -7,6 +7,18 @@ const bookButton = document.getElementById("bookButton");
 const bookMessage = document.getElementById("bookMessage");
 let chosenSlot = null;
 
+// The form and message normally sit under the whole list.
+// When a time is tapped, we move them right under that time instead.
+const formHome = document.createComment("booking form home");
+slotList.after(formHome);
+
+function parkForm() {
+    bookForm.classList.add("d-none");
+    bookForm.style.width = "";
+    bookMessage.style.width = "";
+    formHome.after(bookForm, bookMessage);
+}
+
 // Where did this visitor come from? e.g. smilewithjay.com/?src=flyer
 const ALLOWED_SOURCES = ["flyer", "card", "social"];
 const tag = (new URLSearchParams(window.location.search).get("src") || "").toLowerCase();
@@ -26,6 +38,7 @@ function prettyTime(slotId) {
 
 // GET /slots: show open times as buttons
 async function loadSlots() {
+    parkForm();
     slotList.innerHTML = "";
     try {
         const response = await fetch(`${API_URL}/slots`);
@@ -37,7 +50,7 @@ async function loadSlots() {
         data.openSlots.forEach(slotId => {
             const button = document.createElement("button");
             button.type = "button";
-            button.className = "btn btn-outline-primary";
+            button.className = "btn btn-outline-primary slot-btn";
             button.textContent = prettyTime(slotId);
             button.addEventListener("click", () => pickSlot(slotId, button));
             slotList.appendChild(button);
@@ -50,11 +63,17 @@ async function loadSlots() {
 // Patient taps a time: highlight it and show the form
 function pickSlot(slotId, button) {
     chosenSlot = slotId;
-    slotList.querySelectorAll("button").forEach(b => b.classList.replace("btn-primary", "btn-outline-primary"));
+    slotList.querySelectorAll(".slot-btn").forEach(b => b.classList.replace("btn-primary", "btn-outline-primary"));
     button.classList.replace("btn-outline-primary", "btn-primary");
     selectedSlotText.textContent = prettyTime(slotId);
-    bookForm.classList.remove("d-none");
     bookMessage.innerHTML = "";
+
+    // Drop the form in right after the tapped time, full width
+    bookForm.style.width = "100%";
+    bookMessage.style.width = "100%";
+    button.after(bookForm, bookMessage);
+    bookForm.classList.remove("d-none");
+    bookForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 // POST /book: send their info and the chosen slot
@@ -81,15 +100,19 @@ bookForm.addEventListener("submit", async (event) => {
         if (response.ok) {
             showConfirmation(chosenSlot);
             bookForm.reset();
-            bookForm.classList.add("d-none");
-            loadSlots();
+            await loadSlots();
+            bookMessage.scrollIntoView({ behavior: "smooth", block: "center" });
         } else {
             bookMessage.innerHTML = "";
             const p = document.createElement("p");
             p.className = "text-danger";
             p.textContent = data.error || "Something went wrong. Please try again.";
             bookMessage.appendChild(p);
-            if (response.status === 409) loadSlots();
+            if (response.status === 409) {
+                await loadSlots();
+                bookMessage.appendChild(p);
+                bookMessage.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
         }
     } catch (err) {
         bookMessage.innerHTML = '<p class="text-danger">Couldn\'t reach the system. Please try again or call (949) 630-7148.</p>';
@@ -148,3 +171,18 @@ contactForm.addEventListener("submit", async (event) => {
     submitButton.disabled = false;
     submitButton.textContent = "Request my free cleaning";
 });
+
+// Hide the sticky "View available times" phone button while the booking or
+// request section is on screen, so it never covers the form buttons.
+const mobileCta = document.querySelector(".mobile-cta");
+const formSections = [".booking-section", ".contact-section"]
+    .map(sel => document.querySelector(sel))
+    .filter(Boolean);
+if (mobileCta && formSections.length && "IntersectionObserver" in window) {
+    const onScreen = new Set();
+    const watcher = new IntersectionObserver(entries => {
+        entries.forEach(e => e.isIntersecting ? onScreen.add(e.target) : onScreen.delete(e.target));
+        mobileCta.style.display = onScreen.size ? "none" : "";
+    });
+    formSections.forEach(sec => watcher.observe(sec));
+}

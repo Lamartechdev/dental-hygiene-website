@@ -11,7 +11,7 @@ def lambda_handler(event, context):
         "statusCode": 200,
         "headers": {
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "https://smilewithj.com"
+            "Access-Control-Allow-Origin": "https://smilewithjay.com"
         },
         "body": json.dumps({"openSlots": slots})
     }
